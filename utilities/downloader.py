@@ -1,53 +1,51 @@
-#!/usr/bin/env python3
-"""
-Script: yf_ohlc.py
-Fetch OHLC data from Yahoo Finance and save as CSV files in local
-directory.
-"""
+#/usr/bin/env python3
+
 import argparse
+import datetime
 import os
 import pandas as pd
 import pandas_datareader.data as web
 
+CSV_DIR=os.path.expanduser('~/tick_data/csv')
+HDF5_FILE='~/tick_data/ohlc_ds.h5'
+
 def cli_args():
     parser = argparse.ArgumentParser(description='OHLC fetcher')
-    parser.add_argument('-d', dest='data_dir', action='store', default='~/TICK_DATA')
-    parser.add_argument('-f', dest='ticker_file', action='store', required=True)
+    parser.add_argument('-t', dest='ticker_sym', action='store', required=True)
+    parser.add_argument('-s', dest='date_start', action='store', default=get_dstr(1))
+    parser.add_argument('-e', dest='date_end', action='store', default=get_dstr(1095))
+    parser.add_argument('-p', dest='provider', action='store', default='yahoo')
     return parser.parse_args()
 
-def check_exists(fname):
-    if os.path.isfile(fname):
-        return True
-    return False
+def get_dstr(delta):
+    target_date = datetime.datetime.now() - datetime.timedelta(days=delta)
+    return target_date.strftime('%Y-%m-%d')
 
-def web_fetch(ticker_sym):
-    provider = 'yahoo'
-    df = web.DataReader(ticker_sym, provider)
+def web_fetch(args):
+    df = web.DataReader(args.ticker_sym, args.provider, start=args.date_start,
+                            end=args.date_end)
     df.columns = ['high', 'low', 'open', 'close', 'vol', 'adj_close']
     df.index.rename('date', inplace=True)
     return df
 
-def write_csv_file(file_name):
-    df.to_csv(file_name)
+def write_csv_file(args):
+    symbol = args.ticker_sym.lower()
+    csv_fname = os.path.join(CSV_DIR, f'{symbol}.csv')
+    df.to_csv(csv_fname)
+
+def write_hdf(args, df):
+
+    hdf = pd.HDFStore(HDF5_FILE)
+
+    if f'/{args.ticker_sym.lower()}' in hdf.keys():
+        hdf.remove(f'/{args.ticker_sym.lower()}')
+    else:
+        hdf.put(args.ticker_sym.lower(), df, format='table', data_columns=True)
 
 
 if __name__ == '__main__':
 
     args = cli_args()
-
-    if not os.path.isdir(args.data_dir):
-        os.makedirs(args.data_dir)
-
-    with open(args.ticker_file, 'r') as tfh:
-
-        for line in tfh.readlines():
-            ticker_sym = line.rstrip()
-
-            file_name = os.path.join(args.data_dir, f'{ticker_sym}.csv')
-
-            if not check_exists(file_name):
-                print(f'Fetching {ticker_sym}')
-                df = web_fetch(ticker_sym)
-                write_csv_file(file_name)
-            else:
-                print(f'{file_name} exists, skipping download')
+    df = web_fetch(args)
+    write_csv_file(args)
+    write_hdf(args, df)
