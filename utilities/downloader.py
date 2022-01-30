@@ -1,4 +1,4 @@
-#/usr/bin/env python3
+#!/usr/bin/env python3
 
 import argparse
 import datetime
@@ -12,8 +12,8 @@ HDF5_FILE='~/tick_data/ohlc_ds.h5'
 def cli_args():
     parser = argparse.ArgumentParser(description='OHLC fetcher')
     parser.add_argument('-t', dest='ticker_sym', action='store', required=True)
-    parser.add_argument('-s', dest='date_start', action='store', default=get_dstr(1))
-    parser.add_argument('-e', dest='date_end', action='store', default=get_dstr(1095))
+    parser.add_argument('-s', dest='date_start', action='store', default=get_dstr(1095))
+    parser.add_argument('-e', dest='date_end', action='store', default=get_dstr(1))
     parser.add_argument('-p', dest='provider', action='store', default='yahoo')
     return parser.parse_args()
 
@@ -42,6 +42,7 @@ def write_hdf(args, df):
     else:
         hdf.put(args.ticker_sym.lower(), df, format='table', data_columns=True)
 
+    hdf.close()
 
 if __name__ == '__main__':
 
