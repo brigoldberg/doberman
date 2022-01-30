@@ -1,6 +1,5 @@
 # simulation.py
 from .utils import iterate_stocks as iterate_stocks
-from .riskbot import RiskBot as RiskBot
 from .tradebook import TradeBook as TradeBook
 
 
@@ -52,5 +51,5 @@ class Simulation:
             else:
                 cash_value += self.tradebook.calc_position_size(k, trade_date)
 
-        print(f"Simulation PnL: ${int(cash_value)}")
+        print(f"Simulation PnL: ${cash_value:,.0f}")
             
