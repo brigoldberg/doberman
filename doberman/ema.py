@@ -1,9 +1,10 @@
+# ema.py
 import matplotlib.pyplot as plt
 from matplotlib.dates import MonthLocator
 from .utils import iterate_stocks as iterate_stocks
 
 
-class EMA():
+class EMA:
 
     def __init__(self, universe, *args, **kwargs):
         self.universe       = universe
