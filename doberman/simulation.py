@@ -1,4 +1,5 @@
 # simulation.py
+import math
 from .utils import iterate_stocks as iterate_stocks
 from .tradebook import TradeBook as TradeBook
 
@@ -26,11 +27,11 @@ class Simulation:
 
             if signal <=  self.lo_signal and long_test:     # buy signal
 
-                trade_quantity = 100
-                trade_cost = price * 100 * -1
+                trade_quantity = math.floor(self.tradebook.risk_limit / price)
+                trade_cost = price * trade_quantity * -1
                 self.tradebook.update_book(symbol, trade_quantity)
                 self.tradebook.update_book('cash-usd', trade_cost)
-                self.tradebook.log_trade(f'{[trade_date]} BUY 100 {symbol}@{price}')
+                self.tradebook.log_trade(f'{[trade_date]} BUY {trade_quantity} {symbol}@{price}')
 
             elif signal >= self.hi_signal and position_size >= 10:      # Sell signal
                 
