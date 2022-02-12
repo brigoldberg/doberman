@@ -8,9 +8,10 @@ import os
 app_path = os.path.join(os.path.expanduser('~/sandbox/doberman/'))
 sys.path.append(app_path)
 from mp_doberman import Universe
-from mp_doberman import DogPack
 from mp_doberman import EMA
 from mp_doberman import Simulation
+
+NUM_PROCS=4
 
 def cli_args():
     parser = argparse.ArgumentParser(description='MuliProc Dogger')
@@ -26,12 +27,16 @@ def read_ticker_file(args):
             symbols.append(line.rstrip().lower())
     return symbols
     
-def worker(data_sets,  results):
-    stock_obj = data_sets.get()
-    ema = EMA(stock_obj)
-    ema_sim = Simulation(ema.stock_obj)
-    ema_sim.paper_trade()
-    results.put(ema_sim)
+def worker(work_q, result_q):
+    while True:
+        stock_obj = work_q.get()
+        if stock_obj is None:
+            work_q.task_done()
+            break 
+        ema = EMA(stock_obj)
+        ema_sim = Simulation(ema.stock_obj)
+        ema_sim.paper_trade()
+        result_q.put(ema_sim)
 
 if __name__ == '__main__':
 
@@ -41,13 +46,15 @@ if __name__ == '__main__':
     universe.load_data()
     universe.align_dates('2020-01-01', '2020-12-31')
     
-    task_queue = mp.Queue()
+    task_queue = mp.JoinableQueue()
     done_queue = mp.Queue()
 
     for stock_name, stock_obj in universe.stocks.items():
         task_queue.put(stock_obj)
+    for x in range(NUM_PROCS):
+        task_queue.put(None)
 
-    for stock_name, stock_obj in universe.stocks.items():
+    for i in range(NUM_PROCS):
         p = mp.Process(target=worker, args=(task_queue, done_queue))
         p.start()
 
