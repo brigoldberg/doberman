@@ -1,26 +1,23 @@
 # simulation.py
-import math
-from .utils import iterate_stocks as iterate_stocks
-from .tradebook import TradeBook as TradeBook
 
+import math
+from .tradebook import TradeBook as TradeBook
 
 class Simulation:
 
-    tradebook = TradeBook()
-
-    def __init__(self, universe, *args, **kwargs):
-        self.universe  = universe
+    def __init__(self, stock_obj, *args, **kwargs):
+        self.stock_obj = stock_obj
         self.hi_signal = kwargs.get('hi_signal', 1)
         self.lo_signal = kwargs.get('lo_signal', -1)
+        self.tradebook = TradeBook()
 
-    @iterate_stocks
-    def paper_trade(self, stock_obj):
+    def paper_trade(self):
 
-        for trade_date in stock_obj.signal.index:
-            
-            symbol = stock_obj.symbol
-            price  = stock_obj.tsdb['adj_close'].loc[trade_date]
-            signal = stock_obj.signal.loc[trade_date]
+        for trade_date in self.stock_obj.signal.index:
+
+            symbol = self.stock_obj.symbol
+            price  = self.stock_obj.tsdb['adj_close'].loc[trade_date]
+            signal = self.stock_obj.signal.loc[trade_date]
 
             long_test = self.tradebook.trade_risk_check(symbol, trade_date)
             position_size = self.tradebook.book.get(symbol, 0)
@@ -40,7 +37,9 @@ class Simulation:
                 self.tradebook.update_book('cash-usd', trade_revenue)
                 self.tradebook.log_trade(f'{[trade_date]} SELL {position_size} {symbol}@{price}')
 
-    def calc_pnl(self, trade_date):
+    def calc_pnl(self, *args, **kwargs):
+
+        trade_date = kwargs.get('trade_date', self.stock_obj.tsdb.index[-1])
         '''
         Return cash value of all portfolio holding.  This sums up the entire portfolio
         no matter what date you provide, ergo, only use the last trading date.
@@ -52,5 +51,5 @@ class Simulation:
             else:
                 cash_value += self.tradebook.calc_position_size(k, trade_date)
 
-        print(f"Simulation PnL: ${cash_value:,.0f}")
-            
+        print(f"{self.stock_obj.symbol} simulation PnL: ${cash_value:,.0f}")
+

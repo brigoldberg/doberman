@@ -7,15 +7,15 @@ import sys
 import os
 app_path = os.path.join(os.path.expanduser('~/sandbox/doberman/'))
 sys.path.append(app_path)
-from mp_doberman import Universe
-from mp_doberman import EMA
-from mp_doberman import Simulation
+from doberman import Universe
+from doberman import MACD
+from doberman import Simulation
 
 NUM_PROCS=4
 
 def cli_args():
     parser = argparse.ArgumentParser(description='MuliProc Dogger')
-    parser.add_argument('-f', dest='ticker_file', action='store')
+    parser.add_argument('-f', dest='ticker_file', action='store', required=True)
     parser.add_argument('-v', dest='verbose', action='store_true')
     return parser.parse_args()
 
@@ -33,10 +33,10 @@ def worker(work_q, result_q):
         if stock_obj is None:
             work_q.task_done()
             break 
-        ema = EMA(stock_obj)
-        ema_sim = Simulation(ema.stock_obj)
-        ema_sim.paper_trade()
-        result_q.put(ema_sim)
+        macd = MACD(stock_obj)
+        macd_sim = Simulation(macd.stock_obj)
+        macd_sim.paper_trade()
+        result_q.put(macd_sim)
 
 if __name__ == '__main__':
 
