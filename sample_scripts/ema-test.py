@@ -58,6 +58,8 @@ if __name__ == '__main__':
         p = mp.Process(target=worker, args=(task_queue, done_queue))
         p.start()
 
+    sim_results = {}
     for stock_name, stock_obj in universe.stocks.items():
         result = done_queue.get()
+        sim_results[result.stock_obj.symbol] = result.stock_obj.tsdb
         result.calc_pnl()
