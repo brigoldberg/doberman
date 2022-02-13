@@ -5,6 +5,7 @@ class MACD:
 
     def __init__(self, stock_obj, *args, **kwargs):
         self.stock_obj  = stock_obj
+        self.name       = 'macd'
         self.macd_fast  = kwargs.get('macd_fast', 12)
         self.macd_slow  = kwargs.get('macd_slow', 26)
         self.macd_sig   = kwargs.get('macd_sig', 9)
@@ -21,13 +22,13 @@ class MACD:
         self.stock_obj.tsdb['macd']      = self.stock_obj.tsdb['macd_fast'] - self.stock_obj.tsdb['macd_slow']
 
         self.stock_obj.tsdb['macd_sig']  = self.stock_obj.tsdb['macd'].ewm(span=self.macd_sig).mean()
-        self.stock_obj.tsdb['macd_hist'] = self.stock_obj.tsdb['macd'] - self.stock_obj.tsdb['macd_sig']
+        self.stock_obj.tsdb['histogram'] = self.stock_obj.tsdb['macd'] - self.stock_obj.tsdb['macd_sig']
 
     def _signal_test(self, row):
-        if row.macd_hist > self.hist_max:
-            return 1
-        elif row.macd_hist < self.hist_min:
+        if row.histogram > self.hist_max:
             return -1
+        elif row.histogram < self.hist_min:
+            return 1
         else:
             return 0
 
