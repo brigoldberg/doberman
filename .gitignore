@@ -139,3 +139,6 @@ scratch/*
 
 # Garbage
 *.swp
+
+# PyCharm
+.idea/*
