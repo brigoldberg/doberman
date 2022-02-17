@@ -2,6 +2,8 @@
 
 
 class MACD:
+    
+    CLOSE = 'close'
 
     def __init__(self, stock_obj, *args, **kwargs):
         self.stock_obj  = stock_obj
@@ -17,8 +19,8 @@ class MACD:
         self._calc_signal()
 
     def _calc_macd(self):
-        self.stock_obj.tsdb['macd_fast'] = self.stock_obj.tsdb['adj_close'].ewm(span=self.macd_fast).mean()
-        self.stock_obj.tsdb['macd_slow'] = self.stock_obj.tsdb['adj_close'].ewm(span=self.macd_slow).mean()
+        self.stock_obj.tsdb['macd_fast'] = self.stock_obj.tsdb[self.CLOSE].ewm(span=self.macd_fast).mean()
+        self.stock_obj.tsdb['macd_slow'] = self.stock_obj.tsdb[self.CLOSE].ewm(span=self.macd_slow).mean()
         self.stock_obj.tsdb['macd']      = self.stock_obj.tsdb['macd_fast'] - self.stock_obj.tsdb['macd_slow']
 
         self.stock_obj.tsdb['macd_sig']  = self.stock_obj.tsdb['macd'].ewm(span=self.macd_sig).mean()

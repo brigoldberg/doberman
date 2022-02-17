@@ -7,7 +7,7 @@ from matplotlib.dates import DateFormatter
 
 class DoberPlot:
 
-    price_col = 'adj_close'
+    price_col = 'close'
 
     def __init__(self, stock_obj):
         self.symbol = stock_obj.symbol

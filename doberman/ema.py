@@ -3,6 +3,8 @@
 
 class EMA:
 
+    CLOSE = 'close'
+
     def __init__(self, stock_obj, *args, **kwargs):
         self.stock_obj      = stock_obj
         self.ema_window     = kwargs.get('ema_window', 30)
@@ -13,8 +15,8 @@ class EMA:
         self._calc_signal()
 
     def _calc_ema(self):
-        self.stock_obj.tsdb['ema'] = self.stock_obj.tsdb['adj_close'].ewm(span=self.ema_window).mean()
-        self.stock_obj.tsdb['histogram'] = self.stock_obj.tsdb['adj_close'] - self.stock_obj.tsdb['ema']
+        self.stock_obj.tsdb['ema'] = self.stock_obj.tsdb[self.CLOSE].ewm(span=self.ema_window).mean()
+        self.stock_obj.tsdb['histogram'] = self.stock_obj.tsdb[self.CLOSE] - self.stock_obj.tsdb['ema']
 
     def _signal_test(self, row):
         if row.histogram > self.histogram_max:

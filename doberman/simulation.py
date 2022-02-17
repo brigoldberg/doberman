@@ -5,6 +5,8 @@ from .tradebook import TradeBook as TradeBook
 
 class Simulation:
 
+    CLOSE = 'close'
+
     def __init__(self, stock_obj, *args, **kwargs):
         self.stock_obj = stock_obj
         self.hi_signal = kwargs.get('hi_signal', 1)
@@ -16,7 +18,7 @@ class Simulation:
         for trade_date in self.stock_obj.signal.index:
 
             symbol = self.stock_obj.symbol
-            price  = self.stock_obj.tsdb['adj_close'].loc[trade_date]
+            price  = self.stock_obj.tsdb[self.CLOSE].loc[trade_date]
             signal = self.stock_obj.signal.loc[trade_date]
 
             long_test = self.tradebook.trade_risk_check(symbol, trade_date)

@@ -28,8 +28,12 @@ def get_logger(args):
 
 def print_record(args, d):
     date = datetime.datetime.strftime(d.name, '%Y-%m-%d')
-    print(f'{args.ticker}: {date} -- o:{cc(d.open)} h:{cc(d.high)} l:{cc(d.low)} c:{cc(d.close)}' + 
+    try:
+        print(f'{args.ticker}: {date} -- o:{cc(d.open)} h:{cc(d.high)} l:{cc(d.low)} c:{cc(d.close)}' + 
                 f' adj_cls:{cc(d.adj_close)} -- vol:{d.vol:,.0f}')
+    except:
+        print(f'{args.ticker}: {date} -- o:{cc(d.open)} h:{cc(d.high)} l:{cc(d.low)} c:{cc(d.close)}' + 
+                f' -- vol:{d.volume:,.0f}')
 
 if __name__ == '__main__':
 

@@ -5,7 +5,8 @@ import pandas as pd
 
 class TradeBook:
 
-    TICK_DS = os.path.expanduser('~/tick_data/ohlc_ds.h5')
+    TICK_DS = os.path.expanduser('~/tick_data/stooq_ohlc.h5')
+    CLOSE = 'close'
 
     def __init__(self, *args, **kwargs):
 
@@ -24,13 +25,13 @@ class TradeBook:
         else:
             self.book[symbol] = self.book[symbol] + shares
 
-    def get_stock_price(self, symbol, trade_date, col='adj_close'):
+    def get_stock_price(self, symbol, trade_date):
         """
         Input symbol and trade date.
         Return stock price.
         """
         hdf = pd.HDFStore(self.tick_ds, mode='r')
-        stock_price = hdf[symbol]['adj_close'].loc[trade_date]
+        stock_price = hdf[symbol][self.CLOSE].loc[trade_date]
         hdf.close()
         return stock_price
 

@@ -5,7 +5,7 @@ import pandas_datareader.data as web
 
 class Stock:
 
-    tick_ds = os.path.expanduser('~/tick_data/ohlc_ds.h5')
+    tick_ds = os.path.expanduser('~/tick_data/stooq_ohlc.h5')
 
     def __init__(self, symbol):
         self.symbol         = symbol.lower()
@@ -14,7 +14,7 @@ class Stock:
 
     def load_data(self):
         self.tsdb = pd.read_hdf(self.tick_ds, key=f'/{self.symbol}')
-        self.tsdb = self.tsdb.drop(['open', 'high', 'low', 'close'], axis=1)
+        self.tsdb = self.tsdb.drop(['open', 'high', 'low'], axis=1)
 
         self.signal = pd.Series(index=self.tsdb.index)
 
