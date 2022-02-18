@@ -41,7 +41,7 @@ class DoberPlot:
         ax.plot( 
                 self.signal.loc[self.signal == 1].index,
                 self.tsdb[self.price_col][self.signal == 1],
-                '^', markersize=10, color='red')
+                'v', markersize=10, color='red')
 
     def histogram(self, *args, **kwargs):
         strategy_name = kwargs.get('strategy_name')
@@ -68,5 +68,5 @@ class DoberPlot:
         ax.plot( 
                 self.signal.loc[self.signal == 1].index,
                 self.tsdb['histogram'][self.signal == 1],
-                '^', markersize=10, color='red')
+                'v', markersize=10, color='red')
 

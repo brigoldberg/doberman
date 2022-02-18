@@ -12,8 +12,8 @@ class MACD:
         self.macd_slow  = kwargs.get('macd_slow', 26)
         self.macd_sig   = kwargs.get('macd_sig', 9)
 
-        self.hist_max   = kwargs.get('hist_max', 1)
-        self.hist_min   = kwargs.get('hist_min', -1)
+        self.histogram_max   = kwargs.get('histogram_max', 1)
+        self.histogram_min   = kwargs.get('histogram_min', -1)
 
         self._calc_macd()
         self._calc_signal()
@@ -26,13 +26,23 @@ class MACD:
         self.stock_obj.tsdb['macd_sig']  = self.stock_obj.tsdb['macd'].ewm(span=self.macd_sig).mean()
         self.stock_obj.tsdb['histogram'] = self.stock_obj.tsdb['macd'] - self.stock_obj.tsdb['macd_sig']
 
-    def _signal_test(self, row):
-        if row.histogram > self.hist_max:
-            return -1
-        elif row.histogram < self.hist_min:
-            return 1
-        else:
-            return 0
-
     def _calc_signal(self):
-        self.stock_obj.signal = self.stock_obj.tsdb.apply(lambda row: self._signal_test(row), axis=1)
+
+        buy_count = 0
+        sell_count = 0
+
+        for trade_date in self.stock_obj.tsdb.index:
+
+            if self.stock_obj.tsdb['histogram'].loc[trade_date] > self.histogram_max:
+
+                sell_count += 1
+                if sell_count >= 3:
+                    self.stock_obj.signal.loc[trade_date] = 1
+                    sell_count = 0
+
+            elif self.stock_obj.tsdb['histogram'].loc[trade_date] < self.histogram_min:
+
+                buy_count += 1
+                if buy_count >= 3:
+                    self.stock_obj.signal.loc[trade_date] = -1
+                    buy_count = 0

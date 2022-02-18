@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     universe = Universe(read_ticker_file(args))
     universe.load_data()
-    universe.align_dates('2020-01-01', '2020-12-31')
+    universe.align_dates('2020-01-01', '2020-04-30')
     
     task_queue = mp.JoinableQueue()
     done_queue = mp.Queue()

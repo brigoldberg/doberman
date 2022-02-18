@@ -21,4 +21,5 @@ class Stock:
     def snip_dates(self, date_start, date_end):
         """Prune rows from beginning and/or ends of the TSDB"""
         self.tsdb = self.tsdb.loc[date_start:date_end]
+        self.signal = self.signal.loc[date_start:date_end]
 
