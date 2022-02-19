@@ -27,6 +27,10 @@ class DoberPlot:
         elif strategy_name == 'macd':
             self.tsdb['macd_fast'].plot(ax=ax)
             self.tsdb['macd_slow'].plot(ax=ax)
+        elif strategy_name == 'bolbands':
+            self.tsdb['ma'].plot(ax=ax)
+            self.tsdb['bol_hi'].plot(ax=ax)
+            self.tsdb['bol_lo'].plot(ax=ax)
 
         ax.legend(prop={'size':20})
         ax.tick_params(axis='both', which='major', labelsize=20)

@@ -14,8 +14,7 @@ class Stock:
 
     def load_data(self):
         self.tsdb = pd.read_hdf(self.tick_ds, key=f'/{self.symbol}')
-        self.tsdb = self.tsdb.drop(['open', 'high', 'low'], axis=1)
-
+        # create empty signal Series
         self.signal = pd.Series(index=self.tsdb.index)
 
     def snip_dates(self, date_start, date_end):
