@@ -1,4 +1,7 @@
+# utils.py
 """ Utility Functions """
+import toml
+
 
 # For processing every stock object in a universe. 
 # Pass in stock object. USED IN Universe OBJECT
@@ -23,3 +26,9 @@ def iterate_tsdb(func):
         for trade_date in obj_symbol.tsdb.index:
             func(obj_symbol.tsdb.loc[trade_date], col_name)
     return wrapper
+
+# Read TOML file and return dict
+def read_config(fn):
+    with open(fn) as fh:
+        toml_data = toml.load(fh)
+    return toml_data

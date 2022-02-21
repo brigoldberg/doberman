@@ -16,6 +16,7 @@ NUM_PROCS=4
 def cli_args():
     parser = argparse.ArgumentParser(description='MuliProc Dogger')
     parser.add_argument('-f', dest='ticker_file', action='store', required=True)
+    parser.add_argument('-c', dest='config', action='store', required=True)
     parser.add_argument('-v', dest='verbose', action='store_true')
     return parser.parse_args()
 
@@ -42,9 +43,9 @@ if __name__ == '__main__':
 
     args = cli_args()
 
-    universe = Universe(read_ticker_file(args))
+    universe = Universe(read_ticker_file(args), config=args.config)
     universe.load_data()
-    universe.align_dates('2020-01-01', '2020-04-30')
+    universe.align_dates('2020-01-01', '2020-06-30')
     
     task_queue = mp.JoinableQueue()
     done_queue = mp.Queue()

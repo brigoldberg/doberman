@@ -1,0 +1,35 @@
+[data_source]
+hdf5_file = "~/tick_data/stooq_ohlc.h5"
+stock_list_file = "~/tick_data/sp10.ini"
+
+[strategy]
+
+[strategy.ema]
+ema_window = 30
+histogram_min = -3
+histogram_max = +3
+buy_count_max = 2
+sell_count_max = 2
+
+[strategy.macd]
+macd_fast = 12
+macd_slow = 26
+macd_sig = 9
+histogram_max = +1
+histogram_min = -1
+buy_count_max = 2
+sell_count_max = 2
+
+[strategy.bolbands]
+ma_window = 30
+std_deviations = 2
+buy_count_max = 2
+sell_count_max = 2
+
+[simulation]
+hi_signal = +1
+lo_signal = -1
+
+[tradebook]
+cash_init = 100000
+risk_limit = 10000

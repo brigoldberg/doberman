@@ -8,7 +8,7 @@ import os
 app_path = os.path.join(os.path.expanduser('~/sandbox/doberman/'))
 sys.path.append(app_path)
 from doberman import Universe
-from doberman import MACD
+from doberman import BolBands
 from doberman import Simulation
 
 NUM_PROCS=4
@@ -34,10 +34,10 @@ def worker(work_q, result_q):
         if stock_obj is None:
             work_q.task_done()
             break 
-        macd = MACD(stock_obj)
-        macd_sim = Simulation(macd.stock_obj)
-        macd_sim.paper_trade()
-        result_q.put(macd_sim)
+        bb = BolBands(stock_obj)
+        bb_sim = Simulation(bb.stock_obj)
+        bb_sim.paper_trade()
+        result_q.put(bb_sim)
 
 if __name__ == '__main__':
 

@@ -1,5 +1,4 @@
 # bolbands.py
-import sys
 
 
 class BolBands:
@@ -8,17 +7,26 @@ class BolBands:
 
     def __init__(self, stock_obj, *args, **kwargs):
         self.stock_obj  = stock_obj
-        self.ma_window  = kwargs.get('ema_window', 30)
-        self.n          = kwargs.get('std_dev', 2)
+        self.name       = 'bolbands'
+
+        self.bb_cfg      = self.stock_obj.config['strategy']['bolbands']
+        self.ma_window  = self.bb_cfg.get('ma_window', 30)
+        self.std_devs   = self.bb_cfg.get('std_deviations', 2)
+        self.buy_count_max  = self.bb_cfg.get('buy_count_max', 2)
+        self.sell_count_max = self.bb_cfg.get('sell_count_max', 2)
 
         self._calc_bolbands()
         self._calc_signal()
 
     def _calc_bolbands(self):
-        self.stock_obj.tsdb['std_dev'] = self.stock_obj.tsdb['close'].rolling(20).std(ddof=0)
-        self.stock_obj.tsdb['ma']      = self.stock_obj.tsdb['close'].rolling(20).mean()
-        self.stock_obj.tsdb['bol_hi']  = self.stock_obj.tsdb['ma'] + self.n * self.stock_obj.tsdb['std_dev']
-        self.stock_obj.tsdb['bol_lo']  = self.stock_obj.tsdb['ma'] - self.n * self.stock_obj.tsdb['std_dev']
+        self.stock_obj.tsdb['std_dev'] = \
+                    self.stock_obj.tsdb[self.CLOSE].rolling(self.ma_window).std(ddof=0)
+        self.stock_obj.tsdb['ma']      = \
+                    self.stock_obj.tsdb[self.CLOSE].rolling(self.ma_window).mean()
+        self.stock_obj.tsdb['bol_hi']  = self.stock_obj.tsdb['ma'] + \
+                                    self.std_devs * self.stock_obj.tsdb['std_dev']
+        self.stock_obj.tsdb['bol_lo']  = self.stock_obj.tsdb['ma'] - \
+                                    self.std_devs * self.stock_obj.tsdb['std_dev']
 
     def _calc_signal(self):
 
@@ -30,17 +38,16 @@ class BolBands:
             if self.stock_obj.tsdb['close'].loc[trade_date] > self.stock_obj.tsdb['bol_hi'].loc[trade_date]:
                 # sell signal
                 sell_count += 1
-                if sell_count >= 3:
+                if sell_count >= self.sell_count_max:
                     self.stock_obj.signal.loc[trade_date] = 1
                     sell_count = 0
 
             elif self.stock_obj.tsdb['close'].loc[trade_date] < self.stock_obj.tsdb['bol_lo'].loc[trade_date]:
                 # buy signal 
                 buy_count += 1
-                if buy_count >= 2:
+                if buy_count >= self.buy_count_max:
                     self.stock_obj.signal.loc[trade_date] = -1
                     buy_count = 0
 
             else:
                 self.stock_obj.signal.loc[trade_date] = 0
-                
