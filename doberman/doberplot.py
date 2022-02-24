@@ -17,35 +17,45 @@ class DoberPlot:
     def order_signal(self, *args, **kwargs):
         strategy_name = kwargs.get('strategy_name')
         # Plot price 
-        fig, ax = plt.subplots(figsize=(18, 10))
-        fig.suptitle(strategy_name.upper())
-
-        self.tsdb[self.price_col].plot(ax=ax)
+        fig = plt.figure(figsize=(18, 10))
+        #fig.suptitle('Price/Vol')
+        ax1 = plt.subplot2grid((3,3), (0,0), colspan=3, rowspan=2)
+        ax2 = plt.subplot2grid((3,3), (2,0), colspan=3, rowspan=1)
 
         if strategy_name == 'ema':
-            self.tsdb['ema'].plot(ax=ax)
+            ax1.plot(self.tsdb['ema'])
         elif strategy_name == 'macd':
-            self.tsdb['macd_fast'].plot(ax=ax)
-            self.tsdb['macd_slow'].plot(ax=ax)
+            ax1.plot(self.tsdb['macd_fast'])
+            ax1.plot(self.tsdb['macd_slow'])
         elif strategy_name == 'bolbands':
-            self.tsdb['ma'].plot(ax=ax)
-            self.tsdb['bol_hi'].plot(ax=ax)
-            self.tsdb['bol_lo'].plot(ax=ax)
+            ax1.plot(self.tsdb['ma'])
+            ax1.plot(self.tsdb['bol_hi'])
+            ax1.plot(self.tsdb['bol_lo'])
 
-        ax.legend(prop={'size':20})
-        ax.tick_params(axis='both', which='major', labelsize=20)
-        ax.xaxis.set_major_locator(MonthLocator(interval=1))
-        ax.xaxis.set_major_formatter(DateFormatter("%b %Y"))
+        ax1.set_title('Closing Price')
+        ax2.set_title('Volume')
+        ax1.plot(self.tsdb.close)
+        ax2.bar(self.tsdb.index, self.tsdb['volume'])
+
+        ax1.set_ylabel('Closing Price')
+        ax2.set_ylabel('Volume')
+
+        #ax2.legend(prop={'size':20})
+        #ax2.tick_params(axis='both', which='major', labelsize=10)
+        #ax2.xaxis.set_major_locator(MonthLocator(interval=1))
+        #ax2.xaxis.set_major_formatter(DateFormatter("%b %Y"))
 
         # Plot buy/sell signals on price
-        ax.plot( 
+        ax1.plot( 
                 self.signal.loc[self.signal == -1].index,
                 self.tsdb[self.price_col][self.signal == -1],
                 '^', markersize=10, color='green')
-        ax.plot( 
+        ax1.plot( 
                 self.signal.loc[self.signal == 1].index,
                 self.tsdb[self.price_col][self.signal == 1],
                 'v', markersize=10, color='red')
+
+        plt.show()
 
     def histogram(self, *args, **kwargs):
         strategy_name = kwargs.get('strategy_name')

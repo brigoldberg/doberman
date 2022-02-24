@@ -30,3 +30,16 @@ class Universe:
     @iterate_basket
     def align_dates(self, stock_obj, start_date, end_date):
         stock_obj.snip_dates(start_date, end_date)
+
+    def get_correlation(self, *args, **kwargs):
+        """
+        Create DataFrame of adjusted close prices for each ticker.
+        Return Dataframe of correlations for each ticker pair.
+        """
+        close = kwargs.get(close, 'close')
+
+        data = [self.stocks[x].tsdb[self.CLOSE] for x in self.stocks.keys()]
+        ticker_names = self.stocks.keys()
+        universe_prices = pd.concat(data, axis=1, keys=ticker_names)
+
+        self.correlation_matrix = universe_prices.corr()
