@@ -36,10 +36,25 @@ class Universe:
         Create DataFrame of adjusted close prices for each ticker.
         Return Dataframe of correlations for each ticker pair.
         """
-        close = kwargs.get(close, 'close')
+        price_col = kwargs.get('close', 'close')
 
-        data = [self.stocks[x].tsdb[self.CLOSE] for x in self.stocks.keys()]
+        data = [self.stocks[x].tsdb[price_col] for x in self.stocks.keys()]
         ticker_names = self.stocks.keys()
         universe_prices = pd.concat(data, axis=1, keys=ticker_names)
 
         self.correlation_matrix = universe_prices.corr()
+
+    def create_pairs(self, *args, **kwargs):
+        """
+        Return a list of unique pairs of ticker symbols.
+        """
+        self.pairs = []
+        tickers = list(self.stocks.keys())
+        i = 0
+        j = 0
+        for i in range(len(tickers)):
+            for j in range (len(tickers)):
+                if tickers[i] != tickers[j] and (tickers[j], tickers[i]) not in self.pairs:
+                    self.pairs.append((tickers[i], tickers[j]))
+                j += 1
+            i += 1
