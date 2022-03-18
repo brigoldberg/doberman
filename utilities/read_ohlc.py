@@ -9,7 +9,7 @@ import sys
 import pandas as pd
 
 locale.setlocale( locale.LC_ALL, '' )
-HDF_FILE='~/tick_data/ohlc_ds.h5'
+HDF_FILE='~/tick_data/ohlc.h5'
 
 def cli_args():
     parser = argparse.ArgumentParser(description='HDF5 DF Reader')
