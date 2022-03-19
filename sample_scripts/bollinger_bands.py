@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# mp-poodle.py
+# bollinger_bands.py
 
 import argparse
 import multiprocessing as mp
@@ -11,7 +11,7 @@ from doberman import Universe
 from doberman import BolBands
 from doberman import Simulation
 
-NUM_PROCS=4
+NUM_PROCS=8
 
 def cli_args():
     parser = argparse.ArgumentParser(description='MuliProc Dogger')

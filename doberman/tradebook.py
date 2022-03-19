@@ -5,7 +5,7 @@ import pandas as pd
 
 class TradeBook:
 
-    TICK_DS = os.path.expanduser('~/tick_data/stooq_ohlc.h5')
+    TICK_DS = os.path.expanduser('~/tick_data/ohlc.h5')
     CLOSE = 'close'
 
     def __init__(self, *args, **kwargs):

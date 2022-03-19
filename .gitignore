@@ -140,6 +140,7 @@ config.toml
 
 # Garbage
 *.swp
+.DS_Store
 
 # PyCharm
 .idea/*

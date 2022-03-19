@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-import pandas_datareader.data as web
 import toml
 from .utils import read_config
 
@@ -24,7 +23,8 @@ class Stock:
 
         self.tsdb = pd.read_hdf(self.tick_ds, key=f'/{self.symbol}')
         # create empty signal Series
-        self.signal = pd.Series(index=self.tsdb.index)
+        self.signal = pd.Series(index=self.tsdb.index, dtype='int32')
+
 
     def snip_dates(self, date_start, date_end):
 
