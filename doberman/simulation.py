@@ -14,7 +14,9 @@ class Simulation:
         self.tradebook = TradeBook()
 
     def paper_trade(self):
-
+        '''
+        Trade a symbol based upon its signal series data. 
+        '''
         for trade_date in self.stock_obj.signal.index:
 
             symbol = self.stock_obj.symbol
@@ -30,28 +32,12 @@ class Simulation:
                 trade_cost = price * trade_quantity * -1
                 self.tradebook.update_book(symbol, trade_quantity)
                 self.tradebook.update_book('cash-usd', trade_cost)
-                self.tradebook.log_trade(f'{[trade_date]} BUY {trade_quantity} {symbol}@{price}')
+                self.tradebook.log_trade((trade_date, 'buy', trade_quantity, symbol, price))
 
-            elif signal >= self.hi_signal and position_size >= 10:      # Sell signal
+            elif signal >= self.hi_signal and position_size >= 1:      # Sell signal
                 
                 trade_revenue = price * position_size
                 self.tradebook.update_book(symbol, (position_size * -1))
                 self.tradebook.update_book('cash-usd', trade_revenue)
-                self.tradebook.log_trade(f'{[trade_date]} SELL {position_size} {symbol}@{price}')
-
-    def calc_pnl(self, *args, **kwargs):
-
-        trade_date = kwargs.get('trade_date', self.stock_obj.tsdb.index[-1])
-        '''
-        Return cash value of all portfolio holding.  This sums up the entire portfolio
-        no matter what date you provide, ergo, only use the last trading date.
-        '''
-        cash_value = 0
-        for k,v in self.tradebook.book.items():
-            if k == 'cash-usd':
-                cash_value += v
-            else:
-                cash_value += self.tradebook.calc_position_size(k, trade_date)
-
-        print(f"{self.stock_obj.symbol} simulation PnL: ${cash_value:,.0f}")
+                self.tradebook.log_trade((trade_date, 'sell', position_size, symbol, price))
 

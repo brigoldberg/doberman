@@ -137,6 +137,7 @@ tick_data/*
 tick_data_*/*
 scratch/*
 config.toml
+log/*
 
 # Garbage
 *.swp

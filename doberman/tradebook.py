@@ -1,3 +1,5 @@
+# tradebook.py
+
 import os
 import sys
 import pandas as pd
@@ -10,11 +12,14 @@ class TradeBook:
 
     def __init__(self, *args, **kwargs):
 
-        self.cash_init  = kwargs.get('cash_init', 100000)
+        self.cash_init  = kwargs.get('cash_init', 10000)
         self.book       = {'cash-usd': self.cash_init}
         self.tick_ds    = kwargs.get('tick_ds', self.TICK_DS)
-        self.risk_limit = kwargs.get('risk_limit', 10000)
+        self.risk_limit = kwargs.get('risk_limit', 1000)
         self.trade_log  = []
+
+    def log_trade(self, log_entry):
+        self.trade_log.append(log_entry)
 
     def update_book(self, symbol, shares):
         """
@@ -45,7 +50,7 @@ class TradeBook:
         position_size = stock_price * self.book[symbol]
         return position_size
 
-    def calc_book_size(self, trade_date):
+    def calc_book_value(self, trade_date):
         """
         Input trade date.
         Return cash value of all stocks in the book plus held cash.
@@ -59,6 +64,12 @@ class TradeBook:
         book_value += self.book['cash-usd']
 
         return book_value
+
+    def calc_book_pnl(self, trade_date):
+
+        book_pnl = self.calc_book_value(trade_date) - self.cash_init
+        return book_pnl
+
 
     def trade_risk_check(self, symbol, trade_date):
         '''
@@ -74,6 +85,3 @@ class TradeBook:
             return False
         else:
             return True
-
-    def log_trade(self, log_entry):
-        self.trade_log.append(log_entry)
