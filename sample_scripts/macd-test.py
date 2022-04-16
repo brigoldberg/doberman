@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-# mp-poodle.py
+# macd-test.py
 
 import argparse
+import locale
 import multiprocessing as mp
 import sys
 import os
@@ -11,7 +12,8 @@ from doberman import Universe
 from doberman import MACD
 from doberman import Simulation
 
-NUM_PROCS=4
+locale.setlocale(locale.LC_ALL, 'en_US')
+NUM_PROCS=8
 
 def cli_args():
     parser = argparse.ArgumentParser(description='MuliProc Dogger')
@@ -52,15 +54,19 @@ if __name__ == '__main__':
 
     for stock_name, stock_obj in universe.stocks.items():
         task_queue.put(stock_obj)
-    for x in range(NUM_PROCS):
+    for _ in range(NUM_PROCS):
         task_queue.put(None)
 
-    for i in range(NUM_PROCS):
+    for _ in range(NUM_PROCS):
         p = mp.Process(target=worker, args=(task_queue, done_queue))
         p.start()
 
     sim_results = {}
     for stock_name, stock_obj in universe.stocks.items():
         result = done_queue.get()
-        sim_results[result.stock_obj.symbol] = result.stock_obj.tsdb
-        result.calc_pnl()
+        sim_results[result.stock_obj.symbol] = result.tradebook
+
+    for ticker in universe.stocks.keys():
+        fmt_pnl = locale.format_string('%.0f', sim_results[ticker].calc_book_pnl('2020-12-31'), True)
+        print(f"{ticker} PnL: ${fmt_pnl}")
+
