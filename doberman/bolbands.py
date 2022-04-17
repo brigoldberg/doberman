@@ -1,4 +1,5 @@
 # bolbands.py
+from .doberlog import get_logger
 
 
 class BolBands:
@@ -6,8 +7,12 @@ class BolBands:
     CLOSE = 'close'
 
     def __init__(self, stock_obj, *args, **kwargs):
+
         self.stock_obj  = stock_obj
         self.name       = 'bolbands'
+
+        log_level = self.stock_obj.config['logging']['log_level']
+        self.logger = get_logger(f'ema-{self.stock_obj.symbol}', log_level)
 
         self.bb_cfg      = self.stock_obj.config['strategy']['bolbands']
         self.ma_window  = self.bb_cfg.get('ma_window', 30)
@@ -27,6 +32,8 @@ class BolBands:
                                     self.std_devs * self.stock_obj.tsdb['std_dev']
         self.stock_obj.tsdb['bol_lo']  = self.stock_obj.tsdb['ma'] - \
                                     self.std_devs * self.stock_obj.tsdb['std_dev']
+
+        self.logger.info(f'{self.stock_obj.symbol.upper()}: BolBands calculated')
 
     def _calc_signal(self):
 
@@ -51,3 +58,5 @@ class BolBands:
 
             else:
                 self.stock_obj.signal.loc[trade_date] = 0
+
+        self.logger.info(f'{self.stock_obj.symbol.upper()}: Signal calculated')

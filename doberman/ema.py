@@ -1,5 +1,5 @@
 # ema.py
-import sys
+from .doberlog import get_logger
 
 
 class EMA:
@@ -10,6 +10,9 @@ class EMA:
 
         self.stock_obj = stock_obj
         self.name = 'ema'
+
+        log_level = self.stock_obj.config['logging']['log_level']
+        self.logger = get_logger(f'ema-{self.stock_obj.symbol}', log_level)
 
         self.ema_config     = self.stock_obj.config['strategy']['ema']
         self.ema_window     = self.ema_config.get('ema_window', 30)
@@ -25,6 +28,7 @@ class EMA:
 
         self.stock_obj.tsdb['ema'] = self.stock_obj.tsdb[self.CLOSE].ewm(span=self.ema_window).mean()
         self.stock_obj.tsdb['histogram'] = self.stock_obj.tsdb[self.CLOSE] - self.stock_obj.tsdb['ema']
+        self.logger.info(f'{self.stock_obj.symbol.upper()}: EMA calculated')
 
     def _calc_signal(self):
 
@@ -49,3 +53,5 @@ class EMA:
     
             else:
                self.stock_obj.signal.loc[trade_date] = 0
+
+        self.logger.info(f'{self.stock_obj.symbol.upper()}: Signal calculated')

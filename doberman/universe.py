@@ -1,9 +1,10 @@
 import os
 import pandas as pd
 import toml
-from .stock import Stock as Stock
-from .utils import iterate_basket as iterate_basket
-from .utils import read_config as read_config
+from .stock import Stock 
+from .utils import iterate_basket 
+from .utils import read_config 
+from .doberlog import get_logger
 
 
 class Universe:
@@ -11,11 +12,18 @@ class Universe:
     def __init__(self, stock_list, *args, **kwargs):
 
         self.stocks = {}
-        config_file = kwargs.get('config', './config.toml')
-        self.config = read_config(config_file)
+        
+        _config = kwargs.get('config')
+        if type(_config) is not dict:
+            self.config = read_config(_config)
+        else:
+            self.config = _config
 
         for stock_symbol in stock_list:
             self.stocks[stock_symbol] = Stock(stock_symbol, config=self.config)
+
+        log_level = self.config['logging']['log_level']
+        self.logger = get_logger('universe', log_level)
 
     @iterate_basket
     def list_basket(self, stock_obj):

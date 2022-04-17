@@ -1,4 +1,5 @@
 # macd.py
+from .doberlog import get_logger
 
 
 class MACD:
@@ -9,6 +10,9 @@ class MACD:
 
         self.stock_obj  = stock_obj
         self.name       = 'macd'
+
+        log_level = self.stock_obj.config['logging']['log_level']
+        self.logger = get_logger(f'ema-{self.stock_obj.symbol}', log_level)
 
         self.macd_config    = self.stock_obj.config['strategy']['macd']
         self.macd_fast      = self.macd_config.get('macd_fast', 12)
@@ -30,6 +34,7 @@ class MACD:
 
         self.stock_obj.tsdb['macd_sig']  = self.stock_obj.tsdb['macd'].ewm(span=self.macd_sig).mean()
         self.stock_obj.tsdb['histogram'] = self.stock_obj.tsdb['macd'] - self.stock_obj.tsdb['macd_sig']
+        self.logger.info(f'{self.stock_obj.symbol.upper()}: MACD calculated')
 
     def _calc_signal(self):
 
@@ -51,3 +56,5 @@ class MACD:
                 if buy_count >= self.buy_count_max:
                     self.stock_obj.signal.loc[trade_date] = -1
                     buy_count = 0
+
+        self.logger.info(f'{self.stock_obj.symbol.upper()}: Signal calculated')

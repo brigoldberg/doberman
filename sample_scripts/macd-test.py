@@ -15,11 +15,13 @@ from doberman import Simulation
 locale.setlocale(locale.LC_ALL, 'en_US')
 NUM_PROCS=8
 
+DATE_START = '2020-01-01'
+DATE_END   = '2020-06-30'
+
 def cli_args():
     parser = argparse.ArgumentParser(description='MuliProc Dogger')
     parser.add_argument('-f', dest='ticker_file', action='store', required=True)
     parser.add_argument('-c', dest='config', action='store', required=True)
-    parser.add_argument('-v', dest='verbose', action='store_true')
     return parser.parse_args()
 
 def read_ticker_file(args):
@@ -47,7 +49,7 @@ if __name__ == '__main__':
 
     universe = Universe(read_ticker_file(args), config=args.config)
     universe.load_data()
-    universe.align_dates('2020-01-01', '2020-12-31')
+    universe.align_dates(DATE_START, DATE_END)
     
     task_queue = mp.JoinableQueue()
     done_queue = mp.Queue()
@@ -67,6 +69,6 @@ if __name__ == '__main__':
         sim_results[result.stock_obj.symbol] = result.tradebook
 
     for ticker in universe.stocks.keys():
-        fmt_pnl = locale.format_string('%.0f', sim_results[ticker].calc_book_pnl('2020-12-31'), True)
+        fmt_pnl = locale.format_string('%.0f', sim_results[ticker].calc_book_pnl(DATE_END), True)
         print(f"{ticker} PnL: ${fmt_pnl}")
 

@@ -1,14 +1,20 @@
 # simulation.py
 
 import math
-from .tradebook import TradeBook as TradeBook
+from .tradebook import TradeBook 
+from .doberlog import get_logger
 
 class Simulation:
 
     CLOSE = 'close'
 
     def __init__(self, stock_obj, *args, **kwargs):
+
         self.stock_obj = stock_obj
+
+        log_level = self.stock_obj.config['logging']['log_level']
+        self.logger = get_logger(f'sim-{self.stock_obj.symbol}', log_level)
+
         self.hi_signal = kwargs.get('hi_signal', 1)
         self.lo_signal = kwargs.get('lo_signal', -1)
         self.tradebook = TradeBook()
@@ -33,6 +39,9 @@ class Simulation:
                 self.tradebook.update_book(symbol, trade_quantity)
                 self.tradebook.update_book('cash-usd', trade_cost)
                 self.tradebook.log_trade((trade_date, 'buy', trade_quantity, symbol, price))
+                self.logger.debug(f'existing {symbol} position is {position_size} shares')
+                self.logger.debug(f'bought {symbol} {trade_quantity} @ ${price:0.2f}')
+
 
             elif signal >= self.hi_signal and position_size >= 1:      # Sell signal
                 
@@ -40,4 +49,6 @@ class Simulation:
                 self.tradebook.update_book(symbol, (position_size * -1))
                 self.tradebook.update_book('cash-usd', trade_revenue)
                 self.tradebook.log_trade((trade_date, 'sell', position_size, symbol, price))
+                self.logger.debug(f'existing {symbol} position is {position_size} shares')
+                self.logger.debug(f'sold {symbol} {trade_quantity} @ ${price:0.2f}')
 
