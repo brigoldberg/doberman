@@ -1,18 +1,25 @@
+# Set sources for HDF5 file and ticker list source file
 [data_source]
 hdf5_file = "~/tick_data/ohlc.h5"
-stock_list_file = "~/tick_data/sp10.ini"
+stock_list_file = "~/tick_data/sp10.txt"
 
+# Set the log level for all modules in Doberman
 [logging]
-log_level="info"
+log_level="warn"
 
 [strategy]
 
 [strategy.ema]
+# Moving window size
 ema_window = 30
-histogram_min = -3
-histogram_max = +3
-buy_count_max = 2
-sell_count_max = 2
+# Histogram boundaries where exceeding events will create
+# buy or sell signal.
+histogram_min = -5
+histogram_max = +5
+# Number of buy/sell events that must occur before trade
+# is actually permitted.
+buy_count_max = 50
+sell_count_max = 200
 
 [strategy.macd]
 macd_fast = 12
@@ -34,5 +41,5 @@ hi_signal = +1
 lo_signal = -1
 
 [tradebook]
-cash_init = 100000
+cash_init  = 10000
 risk_limit = 10000
