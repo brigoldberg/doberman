@@ -43,6 +43,8 @@ class EMA:
                 if sell_count >= self.sell_count_max:
                     self.stock_obj.signal.loc[trade_date] = 1
                     sell_count = 0
+                else:
+                    self.stock_obj.signal.loc[trade_date] = 0
 
             elif self.stock_obj.tsdb['histogram'].loc[trade_date] < self.histogram_min:
 
@@ -50,6 +52,8 @@ class EMA:
                 if buy_count >= self.buy_count_max:
                     self.stock_obj.signal.loc[trade_date] = -1
                     buy_count = 0
+                else:
+                    self.stock_obj.signal.loc[trade_date] = 0
     
             else:
                self.stock_obj.signal.loc[trade_date] = 0

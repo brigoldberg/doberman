@@ -31,6 +31,14 @@ def read_ticker_file(args):
         for line in lines:
             symbols.append(line.rstrip().lower())
     return symbols
+
+def queue_count(stock_list):
+    # MP-Queue count must be no greater than amount of tickers being
+    # analyzed. Return lesser of ticker count or processor count.
+    if len(stock_list) < NUM_PROCS:
+        return len(stock_list)
+    else:
+        return NUM_PROCS
     
 def worker(work_q, result_q):
     while True:
@@ -50,16 +58,18 @@ if __name__ == '__main__':
     universe = Universe(read_ticker_file(args), config=args.config)
     universe.load_data()
     universe.align_dates(DATE_START, DATE_END)
+
+    NUM_QUEUES = queue_count(universe.stocks)
     
     task_queue = mp.JoinableQueue()
     done_queue = mp.Queue()
 
     for stock_name, stock_obj in universe.stocks.items():
         task_queue.put(stock_obj)
-    for x in range(NUM_PROCS):
+    for x in range(NUM_QUEUES):
         task_queue.put(None)
 
-    for i in range(NUM_PROCS):
+    for i in range(NUM_QUEUES):
         p = mp.Process(target=worker, args=(task_queue, done_queue))
         p.start()
 

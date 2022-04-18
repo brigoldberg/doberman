@@ -29,10 +29,10 @@ class Simulation:
             price  = self.stock_obj.tsdb[self.CLOSE].loc[trade_date]
             signal = self.stock_obj.signal.loc[trade_date]
 
-            long_test = self.tradebook.trade_risk_check(symbol, trade_date)
+            #long_test = self.tradebook.trade_risk_check(symbol, trade_date)
             position_size = self.tradebook.book.get(symbol, 0)
 
-            if signal <=  self.lo_signal and long_test:     # buy signal
+            if signal <=  self.lo_signal and position_size == 0:     # buy signal
 
                 trade_quantity = math.floor(self.tradebook.risk_limit / price)
                 trade_cost = price * trade_quantity * -1
