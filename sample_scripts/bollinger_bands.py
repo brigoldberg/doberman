@@ -78,6 +78,11 @@ if __name__ == '__main__':
         result = done_queue.get()
         sim_results[result.stock_obj.symbol] = result.tradebook
 
+    total_pnl = 0
     for ticker in universe.stocks.keys():
-        fmt_pnl = locale.format_string('%.0f', sim_results[ticker].calc_book_pnl(DATE_END), True)
+        pnl = sim_results[ticker].calc_book_pnl(DATE_END)
+        total_pnl = total_pnl + pnl
+        fmt_pnl = locale.format_string('%.0f', pnl, True)
         print(f"{ticker} PnL: ${fmt_pnl}")
+
+    print(f"Total PnL: ${locale.format_string('%.0f', total_pnl, True)}")
