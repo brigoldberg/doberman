@@ -30,19 +30,20 @@ stock = Stock(symbol, date_start, date_end, config='../config.toml')
 stock.load_data()
 
 def test_configuration():
-
+    # Read configuration and check a parameter settting.
     cfg_val = stock.config['data_map'].get('spot_quote_col', '')
     assert cfg_val == 'close'
 
-def test_data_load():
-
-    row_open = stock.ohlc.loc['2015-01-09']['open']
-    row_close = stock.ohlc.loc['2015-01-09']['close']
+def test_data_load(test_date='2015-01-09'):
+    # Read dataframe and confirm trade date / price match.
+    row_open = stock.ohlc.loc[test_date]['open']
+    row_close = stock.ohlc.loc[test_date]['close']
 
     assert [row_open, row_close] == approx([179.82, 177.96], abs=1)
 
-def test_log_trades():
-
+def test_log_trades(test_date='2015-01-13'):
+    # Add trades to trade log. Confirm shares held and USD position
+    # at specified date.
     col_name = stock.config['data_map'].get('spot_quote_col', 'close')
 
     for trade_date, shares in trades.items():
@@ -50,9 +51,10 @@ def test_log_trades():
         trade_cost = shares * spot_price
         stock.log_trade(trade_date, shares, trade_cost)
 
-    results = [ stock.shares_held('2015-01-13'), stock.shares_held(),
-        stock.usd_position('2015-01-13'), stock.usd_position('2015-01-13')]
+    results = [ stock.shares_held(test_date), stock.shares_held(),
+        stock.usd_position(test_date), stock.usd_position(test_date)]
 
     assert results == approx([56.0, 66.0, 10024.6, 10024.6], abs=1)
     
-    
+def test_pnl_report():
+    pass

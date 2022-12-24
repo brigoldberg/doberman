@@ -1,19 +1,25 @@
 # stock.py
 
+from .utils import get_logger
 from .utils import read_config
 import pandas as pd
+
 
 class Stock:
 
     def __init__(self, ticker, date_start, date_end, **kwargs):
 
         self.ticker = ticker
+        self.signal = {}
 
         _config =  kwargs.get('config', {})
         if type(_config) is not dict:
             self.config = read_config(_config)
         else:
             self.config = _config
+
+        log_level = self.config['logging'].get('log_level', 'warning')
+        self.logger = get_logger(f'stock-{self.ticker}', log_level)
 
         self._ohlc_tsdb = OHLC(ticker, date_start, date_end, self.config)
 
@@ -25,6 +31,7 @@ class Stock:
 
         self._trade_log = TradeLog(self.ticker, self.config, 
                     self._ohlc_tsdb.ohlc.index[0])
+        self.logger.debug(f'Loaded OHLC TSDB')
         
     def log_trade(self, trade_date, shares, trade_cost):
 
@@ -49,7 +56,6 @@ class Stock:
     def trade_log(self):
         return self._trade_log.trade_log
 
-
 class OHLC:
 
     def __init__(self, ticker, date_start, date_end, config):
@@ -68,7 +74,6 @@ class OHLC:
     def calc_pct_ret(self):
         col_name = self.config['data_map'].get('spot_quote_col', 'close')
         self.ohlc['pct_ret'] = self.ohlc[col_name].pct_change()
-
 
 class TradeLog:
 
