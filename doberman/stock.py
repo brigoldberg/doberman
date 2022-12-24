@@ -1,16 +1,13 @@
 # stock.py
-
-from .utils import get_logger
-from .utils import read_config
+import logging
 import pandas as pd
+from .utils import read_config
 
+logger = logging.getLogger(__name__)
 
 class Stock:
 
     def __init__(self, ticker, date_start, date_end, **kwargs):
-
-        self.ticker = ticker
-        self.signal = {}
 
         _config =  kwargs.get('config', {})
         if type(_config) is not dict:
@@ -18,9 +15,11 @@ class Stock:
         else:
             self.config = _config
 
-        log_level = self.config['logging'].get('log_level', 'warning')
-        self.logger = get_logger(f'stock-{self.ticker}', log_level)
+        log_level = self.config['logging'].get('log_level', 'ERROR')
+        logger.setLevel(log_level.upper())
 
+        self.ticker = ticker
+        self.signal = {}
         self._ohlc_tsdb = OHLC(ticker, date_start, date_end, self.config)
 
     def load_data(self):
@@ -31,7 +30,6 @@ class Stock:
 
         self._trade_log = TradeLog(self.ticker, self.config, 
                     self._ohlc_tsdb.ohlc.index[0])
-        self.logger.debug(f'Loaded OHLC TSDB')
         
     def log_trade(self, trade_date, shares, trade_cost):
 
@@ -59,6 +57,7 @@ class Stock:
 class OHLC:
 
     def __init__(self, ticker, date_start, date_end, config):
+
         self.ticker = ticker
         self.config = config
         self.date_start = date_start
@@ -67,13 +66,16 @@ class OHLC:
 
     def load_data(self):
         self.ohlc = pd.read_hdf('~/tick_data/ohlc.h5', key=f'/{self.ticker}')
+        logger.debug(f'Loaded dataframe for {self.ticker}')
 
     def snip_dates(self):
         self.ohlc = self.ohlc.loc[self.date_start:self.date_end]
+        logger.debug(f'Snipped dates for {self.ticker}')
 
     def calc_pct_ret(self):
         col_name = self.config['data_map'].get('spot_quote_col', 'close')
         self.ohlc['pct_ret'] = self.ohlc[col_name].pct_change()
+        logger.debug(f'Calculated pct return for {self.ticker}')
 
 class TradeLog:
 
@@ -90,6 +92,7 @@ class TradeLog:
 
         trade_cost = round(trade_cost, 2)
         self.trade_log.loc[trade_date, ['shares', 'trade_cost']] = [shares, trade_cost]
+        logger.debug(f'Trade logged: {self.ticker} {shares}@{trade_cost}')
 
     def usd_position(self, trade_date=None):
 

@@ -1,20 +1,20 @@
 # backtester.py
-
+import logging
 import math
-from .utils import get_logger
 
+logger = logging.getLogger(__name__)
 
 class BackTester:
 
     def __init__(self, stock_obj):
         
         self.stock_obj = stock_obj
+
+        log_level = self.stock_obj.config['logging'].get('log_level', 'ERROR')
+        logger.setLevel(log_level.upper())
         
         self.spot_col = stock_obj.config['data_map'].get('column_name', 'close')
         self.risk_limit = self.stock_obj.config['strategy'].get('max_position_risk', 10000)
-
-        log_level = self.stock_obj.config['logging'].get('log_level', 'warning')
-        self.logger = get_logger(f'ordermgr-{self.stock_obj.ticker}', log_level)        
 
     def _risk_check(self, signal, trade_date, spot_price):
         position_risk = self.stock_obj.shares_held(trade_date) * spot_price 
@@ -41,6 +41,9 @@ class BackTester:
             if signal[trade_dt] <= -1:          # Buy Stock
                 trade_limit = self._risk_check('buy', trade_dt, spot_price)
                 self.stock_obj.log_trade(trade_dt, trade_limit, spot_price)
+                logger.debug(f'Purchase {self.stock_obj.ticker} {trade_limit}@{spot_price}')
+
             elif signal[trade_dt] >= 1:         # Sell Stock
                 trade_limit = self._risk_check('buy', trade_dt, spot_price)
                 self.stock_obj.log_trade(trade_dt, (trade_limit * -1), spot_price)
+                logger.debug(f'Sell {self.stock_obj.ticker} {trade_limit}@{spot_price}')
