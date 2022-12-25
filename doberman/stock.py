@@ -31,12 +31,12 @@ class Stock:
         self._trade_log = TradeLog(self.ticker, self.config, 
                     self._ohlc_tsdb.ohlc.index[0])
         
-    def log_trade(self, trade_date, shares, trade_cost):
+    def log_trade(self, trade_date, order_type, shares, trade_cost):
 
         if trade_date not in self._ohlc_tsdb.ohlc.index:
             raise Exception(f'{trade_date} not in time series')
 
-        self._trade_log.log_trade(trade_date, shares, trade_cost)
+        self._trade_log.log_trade(trade_date, order_type, shares, trade_cost)
 
     def usd_position(self, trade_date=None):
 
@@ -65,17 +65,20 @@ class OHLC:
         self.ohlc = None
 
     def load_data(self):
-        self.ohlc = pd.read_hdf('~/tick_data/ohlc.h5', key=f'/{self.ticker}')
-        logger.debug(f'Loaded dataframe for {self.ticker}')
+        try:
+            self.ohlc = pd.read_hdf('~/tick_data/ohlc.h5', key=f'/{self.ticker}')
+        except:
+            raise Exception(f'Cannot load data for {self.ticker.upper()}')
+        logger.info(f'Loaded dataframe for {self.ticker}')
 
     def snip_dates(self):
         self.ohlc = self.ohlc.loc[self.date_start:self.date_end]
-        logger.debug(f'Snipped dates for {self.ticker}')
+        logger.info(f'Snipped dates for {self.ticker}')
 
     def calc_pct_ret(self):
         col_name = self.config['data_map'].get('spot_quote_col', 'close')
         self.ohlc['pct_ret'] = self.ohlc[col_name].pct_change()
-        logger.debug(f'Calculated pct return for {self.ticker}')
+        logger.info(f'Calculated pct return for {self.ticker}')
 
 class TradeLog:
 
@@ -86,13 +89,20 @@ class TradeLog:
 
         self.trade_log = pd.DataFrame(index=[tl_index,], dtype='float64')
         self.trade_log['shares'] = 0            # shares held
+        self.trade_log['order_type'] = None
         self.trade_log['trade_cost'] = 0        # total cost of trade
 
-    def log_trade(self, trade_date, shares, trade_cost):
+    def log_trade(self, trade_date, order_type, shares, trade_cost):
 
-        trade_cost = round(trade_cost, 2)
-        self.trade_log.loc[trade_date, ['shares', 'trade_cost']] = [shares, trade_cost]
-        logger.debug(f'Trade logged: {self.ticker} {shares}@{trade_cost}')
+        trade_cost = round((shares * trade_cost), 2)
+
+        if order_type == 'buy':
+            trade_cost = trade_cost * -1
+        elif order_type == 'sell':
+            shares = shares * -1
+
+        self.trade_log.loc[trade_date, ['shares', 'order_type', 'trade_cost']] = [shares, order_type, trade_cost]
+        logger.info(f'Trade logged: {self.ticker} {order_type} {shares} @ ${round(trade_cost, 2)}')
 
     def usd_position(self, trade_date=None):
 

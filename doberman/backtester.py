@@ -24,7 +24,17 @@ class BackTester:
             trade_size = self._calc_trade_size(risk_allowed, spot_price)
         elif signal == 'sell':
             # dump entire position
-            trade_size = self.stock_obj.shares_held(risk_allowed, spot_price)
+            trade_size = int(self.stock_obj.shares_held(trade_date))
+        else:
+            trade_size = 0
+        
+        td_str = str(trade_date)[:10]
+        if trade_size != 0:
+            logger.debug(f'Risk Check ({td_str}) allows {signal.upper()} '
+                        + f'{trade_size} @ ${spot_price:0.2f}')
+        else:
+            logger.debug(f'Risk check ({td_str}) allows {signal.upper()} 0 shares.')
+            
         return trade_size
 
     def _calc_trade_size(self, risk_allowed, spot_price):
@@ -36,14 +46,14 @@ class BackTester:
 
         for trade_dt in self.stock_obj.ohlc[self.spot_col].index:
 
-            spot_price = self.stock_obj.ohlc[self.spot_col].loc[trade_dt]
+            spot_price = round(self.stock_obj.ohlc[self.spot_col].loc[trade_dt], 2)
 
             if signal[trade_dt] <= -1:          # Buy Stock
                 trade_limit = self._risk_check('buy', trade_dt, spot_price)
-                self.stock_obj.log_trade(trade_dt, trade_limit, spot_price)
-                logger.debug(f'Purchase {self.stock_obj.ticker} {trade_limit}@{spot_price}')
+                if abs(trade_limit) > 0:
+                    self.stock_obj.log_trade(trade_dt, 'buy', trade_limit, spot_price)
 
             elif signal[trade_dt] >= 1:         # Sell Stock
-                trade_limit = self._risk_check('buy', trade_dt, spot_price)
-                self.stock_obj.log_trade(trade_dt, (trade_limit * -1), spot_price)
-                logger.debug(f'Sell {self.stock_obj.ticker} {trade_limit}@{spot_price}')
+                trade_limit = self._risk_check('sell', trade_dt, spot_price)
+                if abs(trade_limit) > 0:
+                    self.stock_obj.log_trade(trade_dt, 'sell', trade_limit, spot_price)

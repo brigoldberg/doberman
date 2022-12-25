@@ -9,7 +9,7 @@ spot_quote_col = 'close'
 
 # Set the log level for all modules
 [logging]
-log_level="debug"
+log_level="info"
 
 [strategy]
 max_position_risk = 10000
