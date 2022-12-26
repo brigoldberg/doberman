@@ -12,11 +12,11 @@ symbol = 'spy'
 date_start = '2015-01-01'
 date_end = '2015-01-28'
 trades = {
-    '2015-01-02': 50,
-    '2015-01-07': -50,
-    '2015-01-12': 56,
-    '2015-01-21': -50,
-    '2015-01-27': 60 }
+    '2015-01-02': ('buy', 50),
+    '2015-01-07': ('sell', 50),
+    '2015-01-12': ('buy', 56),
+    '2015-01-21': ('sell', 50),
+    '2015-01-27': ('buy', 60) }
 """
 DATE        PRICE
 2015-01-02  179.005
@@ -36,8 +36,10 @@ def test_configuration():
 
 def test_data_load(test_date='2015-01-09'):
     # Read dataframe and confirm trade date / price match.
-    row_open = stock.ohlc.loc[test_date]['open']
-    row_close = stock.ohlc.loc[test_date]['close']
+    #row_open = stock.ohlc.loc[test_date]['open']
+    #row_close = stock.ohlc.loc[test_date]['close']
+    row_open = stock.spot_price(test_date, 'open')
+    row_close = stock.spot_price(test_date, 'close')
 
     assert [row_open, row_close] == approx([179.82, 177.96], abs=1)
 
@@ -46,15 +48,17 @@ def test_log_trades(test_date='2015-01-13'):
     # at specified date.
     col_name = stock.config['data_map'].get('spot_quote_col', 'close')
 
-    for trade_date, shares in trades.items():
-        spot_price = stock.ohlc[col_name].loc[trade_date]
-        trade_cost = shares * spot_price
-        stock.log_trade(trade_date, shares, trade_cost)
+    for trade_date, stock_order in trades.items():
+        order_type, shares = stock_order
+        trade_cost = shares * stock.spot_price(trade_date, col_name)
+        stock.log_trade(trade_date, order_type, shares, trade_cost)
 
-    results = [ stock.shares_held(test_date), stock.shares_held(),
-        stock.usd_position(test_date), stock.usd_position(test_date)]
+    results = [
+        stock.shares_held(test_date), stock.usd_position(test_date),
+        stock.shares_held(), stock.usd_position()
+    ]
 
-    assert results == approx([56.0, 66.0, 10024.6, 10024.6], abs=1)
+    assert results == approx([56.0, -10024.6, 66, -11774.7], abs=1)
     
 def test_pnl_report():
     pass

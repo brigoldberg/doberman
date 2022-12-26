@@ -37,14 +37,25 @@ class Stock:
             raise Exception(f'{trade_date} not in time series')
 
         self._trade_log.log_trade(trade_date, order_type, shares, trade_cost)
+        logger.debug(f'Trade logged: {trade_date.strftime("%Y-%m-%d")} {self.ticker} {order_type} {shares} @ ${round(trade_cost, 2)}')
 
     def usd_position(self, trade_date=None):
-
         return self._trade_log.usd_position(trade_date)
 
     def shares_held(self, trade_date=None):
-
         return self._trade_log.shares_held(trade_date)
+
+    def max_drawdown(self, trade_date=None):
+        return self._trade_log.max_drawdown(trade_date)
+
+    def spot_price(self, trade_date=None, col='close'):
+        if not trade_date:
+            trade_date = self.trade_log.index[-1]
+
+        if trade_date not in self._ohlc_tsdb.ohlc.index:
+            raise Exception(f'{trade_date} not in time series')
+
+        return self.ohlc.loc[trade_date][col]
         
     @property
     def ohlc(self):
@@ -72,7 +83,10 @@ class OHLC:
         logger.info(f'Loaded dataframe for {self.ticker}')
 
     def snip_dates(self):
-        self.ohlc = self.ohlc.loc[self.date_start:self.date_end]
+        try:
+            self.ohlc = self.ohlc.loc[self.date_start:self.date_end]
+        except:
+            raise Exception(f'Cannot snip dates for f{self.ticker}')
         logger.info(f'Snipped dates for {self.ticker}')
 
     def calc_pct_ret(self):
@@ -94,7 +108,7 @@ class TradeLog:
 
     def log_trade(self, trade_date, order_type, shares, trade_cost):
 
-        trade_cost = round((shares * trade_cost), 2)
+        trade_cost = round((trade_cost), 2)
 
         if order_type == 'buy':
             trade_cost = trade_cost * -1
@@ -102,7 +116,7 @@ class TradeLog:
             shares = shares * -1
 
         self.trade_log.loc[trade_date, ['shares', 'order_type', 'trade_cost']] = [shares, order_type, trade_cost]
-        logger.info(f'Trade logged: {self.ticker} {order_type} {shares} @ ${round(trade_cost, 2)}')
+        logger.debug(f'Trade logged: {trade_date.strftime("%Y-%m-%d")} {self.ticker} {order_type} {shares} @ ${round(trade_cost, 2)}')
 
     def usd_position(self, trade_date=None):
 
@@ -116,3 +130,10 @@ class TradeLog:
         if not trade_date:
             trade_date = self.trade_log.index[-1]
         return self.trade_log['shares'].loc[:trade_date].sum()
+
+    def max_drawdown(self, trade_date=None):
+
+        if not trade_date:
+            trade_date = self.trade_log.index[-1]
+        return self.trade_log['trade_cost'].loc[:trade_date].cumsum().min()
+        

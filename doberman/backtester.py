@@ -17,6 +17,10 @@ class BackTester:
         self.risk_limit = self.stock_obj.config['strategy'].get('max_position_risk', 10000)
 
     def _risk_check(self, signal, trade_date, spot_price):
+        """
+        Return number of shares allowed to be traded based on held shares
+        or risk parameters.
+        """
         position_risk = self.stock_obj.shares_held(trade_date) * spot_price 
         risk_allowed = self.risk_limit - abs(position_risk)
 
@@ -50,10 +54,12 @@ class BackTester:
 
             if signal[trade_dt] <= -1:          # Buy Stock
                 trade_limit = self._risk_check('buy', trade_dt, spot_price)
+                trade_cost = trade_limit * spot_price
                 if abs(trade_limit) > 0:
-                    self.stock_obj.log_trade(trade_dt, 'buy', trade_limit, spot_price)
+                    self.stock_obj.log_trade(trade_dt, 'buy', trade_limit, trade_cost)
 
             elif signal[trade_dt] >= 1:         # Sell Stock
                 trade_limit = self._risk_check('sell', trade_dt, spot_price)
+                trade_cost = trade_limit * spot_price
                 if abs(trade_limit) > 0:
-                    self.stock_obj.log_trade(trade_dt, 'sell', trade_limit, spot_price)
+                    self.stock_obj.log_trade(trade_dt, 'sell', trade_limit, trade_cost)
