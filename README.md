@@ -1,0 +1,2 @@
+# doberman
+Simple algo backtester
