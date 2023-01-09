@@ -53,7 +53,8 @@ class Stock:
             trade_date = self.trade_log.index[-1]
 
         if trade_date not in self._ohlc_tsdb.ohlc.index:
-            raise Exception(f'{trade_date} not in time series')
+            #raise Exception(f'{trade_date} not in time series')
+            logger.error(f'{self.ticker} {trade_date} not in time series')
 
         return self.ohlc.loc[trade_date][col]
         
@@ -76,8 +77,9 @@ class OHLC:
         self.ohlc = None
 
     def load_data(self):
+        hdf_fn = self.config['data_source'].get('hdf5_file')
         try:
-            self.ohlc = pd.read_hdf('~/tick_data/ohlc.h5', key=f'/{self.ticker}')
+            self.ohlc = pd.read_hdf(hdf_fn, key=f'/{self.ticker}')
         except:
             raise Exception(f'Cannot load data for {self.ticker.upper()}')
         logger.info(f'Loaded dataframe for {self.ticker}')

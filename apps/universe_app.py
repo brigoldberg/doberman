@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import locale
+import logging
 import multiprocessing as mp
 import os
 import sys
@@ -24,14 +25,26 @@ def cli_args():
     parser.add_argument('-s', dest='date_start', action='store', type=str, default=DATE_START)
     parser.add_argument('-e', dest='date_end', action='store', type=str, default=DATE_END)
     parser.add_argument('-x', dest='signal_name', action='store', default=SIGNAL_NAME)
+    parser.add_argument('-v', dest='verbose', action='store_true')
     return parser.parse_args()
+
+def get_logger(args):
+    logger = logging.getLogger(__name__)
+    if args.verbose:
+        logging.basicConfig(format='%(message)s',level=logging.DEBUG)
+    else:
+        logging.basicConfig(format='%(message)s',level=logging.WARNING)
+    return logger
 
 def read_ticker_file(args):
     symbols = []
-    with open(args.ticker_file, 'r') as fh:
-        lines = fh.readlines()
-        for line in lines:
-            symbols.append(line.rstrip().lower())
+    try:
+        with open(args.ticker_file, 'r') as fh:
+            lines = fh.readlines()
+            for line in lines:
+                symbols.append(line.rstrip().lower())
+    except:
+        logger.error(f'Could not open {args.ticker_file}.')
     return symbols
 
 def queue_count(stock_list):
@@ -55,6 +68,7 @@ def worker(wq, rq, signal_name):
 if __name__ == '__main__':
 
     args = cli_args()
+    logger = get_logger(args)
 
     universe = Universe(read_ticker_file(args), args.date_start, 
                                 args.date_end, config=args.config)
