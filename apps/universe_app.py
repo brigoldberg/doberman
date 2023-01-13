@@ -29,11 +29,11 @@ def cli_args():
     return parser.parse_args()
 
 def get_logger(args):
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger()
     if args.verbose:
-        logging.basicConfig(format='%(message)s',level=logging.DEBUG)
+        logging.basicConfig(format='%(levelname)s - %(message)s',level=logging.DEBUG)
     else:
-        logging.basicConfig(format='%(message)s',level=logging.WARNING)
+        logging.basicConfig(format='%(levelname)s - %(message)s',level=logging.WARNING)
     return logger
 
 def read_ticker_file(args):

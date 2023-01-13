@@ -19,5 +19,5 @@ sim = StrategyFactory(s, 'ema')
 bt = BackTester(s)
 bt.backtest('ema')
 
-print(f'{s.ticker} shares: {s.shares_held()} -- cash: ${s.usd_position():0.2f}')
+print(f'{s.ticker.upper()} shares: {s.shares_held()} -- cash: ${s.usd_position():0.2f}')
 print(s.trade_log)
