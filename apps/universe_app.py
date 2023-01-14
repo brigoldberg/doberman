@@ -71,7 +71,8 @@ if __name__ == '__main__':
     logger = get_logger(args)
 
     universe = Universe(read_ticker_file(args), args.date_start, 
-                                args.date_end, config=args.config)
+                                args.date_end, config=args.config, 
+                                signal_name=args.signal_name)
 
     NUM_QUEUES = queue_count(universe.stocks)
 
@@ -102,5 +103,10 @@ if __name__ == '__main__':
     max_drawdown = universe.pnl['cash'].min()
 
     print(f'Max drawdown: {locale.currency(max_drawdown, grouping=True)}')
-    print(universe.book)
+    #print(universe.book)
     print(f"Stonk'd Gains: {locale.currency(universe.book['value'].sum(), grouping=True)}")
+
+    universe.universe_results()
+    from pprint import pprint
+    pprint(universe.simulation_result)
+

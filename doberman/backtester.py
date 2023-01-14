@@ -2,7 +2,7 @@
 import logging
 import math
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 class BackTester:
 
@@ -10,9 +10,6 @@ class BackTester:
         
         self.stock_obj = stock_obj
 
-        log_level = self.stock_obj.config['logging'].get('log_level', 'ERROR')
-        logger.setLevel(log_level.upper())
-        
         self.spot_col = stock_obj.config['data_map'].get('column_name', 'close')
         self.risk_limit = self.stock_obj.config['strategy'].get('max_position_risk', 10000)
 

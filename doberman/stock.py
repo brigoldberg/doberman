@@ -3,7 +3,7 @@ import logging
 import pandas as pd
 from .utils import read_config
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 class Stock:
 
@@ -14,9 +14,6 @@ class Stock:
             self.config = read_config(_config)
         else:
             self.config = _config
-
-        log_level = self.config['logging'].get('log_level', 'ERROR')
-        logger.setLevel(log_level.upper())
 
         self.ticker = ticker
         self.signal = {}
@@ -37,13 +34,18 @@ class Stock:
             raise Exception(f'{trade_date} not in time series')
 
         self._trade_log.log_trade(trade_date, order_type, shares, trade_cost)
-        logger.debug(f'Trade logged: {trade_date.strftime("%Y-%m-%d")} {self.ticker} {order_type} {shares} @ ${round(trade_cost, 2)}')
+        logger.debug(f'Trade logged: {trade_date.strftime("%Y-%m-%d")} {self.ticker.upper()} {order_type} {shares} @ ${round(trade_cost, 2)}')
 
     def usd_position(self, trade_date=None):
         return self._trade_log.usd_position(trade_date)
 
     def shares_held(self, trade_date=None):
         return self._trade_log.shares_held(trade_date)
+
+    def position_value(self, trade_date=None):
+        pv = self.shares_held(trade_date)  * self.spot_price(trade_date) \
+                + self.usd_position(trade_date) 
+        return pv
 
     def max_drawdown(self, trade_date=None):
         return self._trade_log.max_drawdown(trade_date)
@@ -54,9 +56,19 @@ class Stock:
 
         if trade_date not in self._ohlc_tsdb.ohlc.index:
             #raise Exception(f'{trade_date} not in time series')
-            logger.error(f'{self.ticker} {trade_date} not in time series')
+            logger.error(f'{self.ticker.upper()} {trade_date} not in time series')
 
         return self.ohlc.loc[trade_date][col]
+
+    def rate_of_return(self, trade_date=None):
+        if not trade_date:
+            trade_date = self.ohlc.index[-1]
+        
+        share_value = self.shares_held(trade_date) * self.spot_price(trade_date) 
+        present_value = share_value + self.usd_position(trade_date)
+        ror = present_value / abs(self.max_drawdown(trade_date))
+
+        return ror
         
     @property
     def ohlc(self):
@@ -82,19 +94,19 @@ class OHLC:
             self.ohlc = pd.read_hdf(hdf_fn, key=f'/{self.ticker}')
         except:
             raise Exception(f'Cannot load data for {self.ticker.upper()}')
-        logger.info(f'Loaded dataframe for {self.ticker}')
+        logger.info(f'Loaded dataframe for {self.ticker.upper()}')
 
     def snip_dates(self):
         try:
             self.ohlc = self.ohlc.loc[self.date_start:self.date_end]
         except:
-            raise Exception(f'Cannot snip dates for f{self.ticker}')
-        logger.info(f'Snipped dates for {self.ticker}')
+            raise Exception(f'Cannot snip dates for f{self.ticker.upper()}')
+        logger.info(f'Snipped dates for {self.ticker.upper()}')
 
     def calc_pct_ret(self):
         col_name = self.config['data_map'].get('spot_quote_col', 'close')
         self.ohlc['pct_ret'] = self.ohlc[col_name].pct_change()
-        logger.info(f'Calculated pct return for {self.ticker}')
+        logger.info(f'Calculated pct return for {self.ticker.upper()}')
 
 class TradeLog:
 
@@ -118,7 +130,7 @@ class TradeLog:
             shares = shares * -1
 
         self.trade_log.loc[trade_date, ['shares', 'order_type', 'trade_cost']] = [shares, order_type, trade_cost]
-        logger.debug(f'Trade logged: {trade_date.strftime("%Y-%m-%d")} {self.ticker} {order_type} {shares} @ ${round(trade_cost, 2)}')
+        logger.debug(f'Trade logged: {trade_date.strftime("%Y-%m-%d")} {self.ticker.upper()} {order_type} {shares} @ ${round(trade_cost, 2)}')
 
     def usd_position(self, trade_date=None):
 
@@ -138,4 +150,3 @@ class TradeLog:
         if not trade_date:
             trade_date = self.trade_log.index[-1]
         return self.trade_log['trade_cost'].loc[:trade_date].cumsum().min()
-        

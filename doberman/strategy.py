@@ -4,7 +4,7 @@ import logging
 import numpy as np
 import pandas as pd
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 class Strategy(ABC):
 
@@ -19,7 +19,6 @@ class Strategy(ABC):
 class EMA(Strategy):
 
     def __init__(self, stock_obj):
-
 
         self.stock_obj = stock_obj
         self.signal_df = pd.DataFrame(index=self.stock_obj.ohlc.index, dtype='float64')
