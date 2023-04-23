@@ -109,4 +109,3 @@ if __name__ == '__main__':
     universe.universe_results()
     from pprint import pprint
     pprint(universe.simulation_result)
-

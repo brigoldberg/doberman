@@ -10,16 +10,38 @@ class Strategy(ABC):
 
     @abstractmethod
     def create_factors(self):
+        """
+        Factors are the signals that indicate when to purchase or sell
+        a stock. They are typically moving window calculations or other
+        technical signals.
+        """
         pass
 
     @abstractmethod
     def create_signal(self):
+        """
+        Signals are the series of sentiments to purchase or sell a stock.
+        They are derived from 'factors' which are calculated previously.
+        
+        Singal(s) are used by the backtesting module to perform a trading
+        simulation over a period of time. The simulator will buy or sell
+        based upon the signal value (+1/-1) and position risk.
+        """ 
         pass
 
+class BollingerBands(Strategy):
+    """
+    Create trendlines of two standard deviations above and below a Simple Moving
+    Average. Buy signal when price crosses bottom trendline and sell when price
+    crossed top trendline.
+    """
+    pass
+
 class EMA(Strategy):
-
+    """
+    EMA (exponential moving average) generates a moving average over a set window.
+    """
     def __init__(self, stock_obj):
-
         self.stock_obj = stock_obj
         self.signal_df = pd.DataFrame(index=self.stock_obj.ohlc.index, dtype='float64')
 
@@ -43,13 +65,14 @@ class EMA(Strategy):
         logger.info(f'Computed EMA signal for {self.stock_obj.ticker}')
         
 class MACD(Strategy):
-
     # This needs to be updated and fixed.
-
+    """
+    Moving Average Crossover Divergence calculates a fast and slow EMA and generates a signal
+    when they cross.
+    """
     def __init__(self, stock_obj):
         self.stock_obj = stock_obj
         self.signal_df = pd.DataFrame(index=self.stock_obj.ohlc.index, dtype='float64')
-
         self.create_factors()
         self.create_signal()
 

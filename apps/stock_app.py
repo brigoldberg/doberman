@@ -10,7 +10,7 @@ from doberman import StrategyFactory
 from doberman import Stock
 
 DATE_START = '2014-01-01'
-DATE_END   = '2014-03-30'
+DATE_END   = '2016-12-30'
 
 s = Stock('amzn', DATE_START, DATE_END, config='../debug-config.toml')
 s.load_data()
@@ -21,3 +21,5 @@ bt.backtest('ema')
 
 print(f'{s.ticker.upper()} shares: {s.shares_held()} -- cash: ${s.usd_position():0.2f}')
 print(s.trade_log)
+
+print(f'Position Value: ${s.position_value():0.2f}')
