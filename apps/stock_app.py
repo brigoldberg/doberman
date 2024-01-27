@@ -20,8 +20,8 @@ bt = BackTester(s)
 bt.backtest('ema')
 
 
-print('---- SIMULATION PERFORMANCE ----')
-print(f'{s.ticker.upper()} shares: {s.shares_held()} -- cash: ${s.usd_position():0.2f}')
+print('---- SIMULATION ENDING PERFORMANCE ----')
+print(f'{s.ticker.upper()} shares: {s.shares_held()} -- cash: ${s.cash_position():0.2f}')
 print(f'Position Value: ${s.position_value():0.2f}')
 print('---- TRADE LOG ----')
 print(s.trade_log)
