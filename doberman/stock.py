@@ -5,6 +5,7 @@ from .utils import read_config
 
 logger = logging.getLogger()
 
+
 class Stock:
 
     def __init__(self, ticker, date_start, date_end, **kwargs):
@@ -19,6 +20,7 @@ class Stock:
         self.signal = {}
         self._ohlc_tsdb = OHLC(ticker, date_start, date_end, self.config)
 
+
     def load_data(self):
         """ Read data from HDF5 file and load into Pandas dataframe """
         self._ohlc_tsdb.load_data()
@@ -27,7 +29,8 @@ class Stock:
 
         self._trade_log = TradeLog(self.ticker, self.config, 
                     self._ohlc_tsdb.ohlc.index[0])
-        
+
+
     def log_trade(self, trade_date:str , order_type: str, shares: int, trade_cost: float):
         # Interface to TradeLog.log_trade method
         if trade_date not in self._ohlc_tsdb.ohlc.index:
@@ -35,13 +38,16 @@ class Stock:
 
         self._trade_log.log_trade(trade_date, order_type, shares, trade_cost)
 
+
     def shares_held(self, trade_date=None) -> float:
         # Interface to TradeLog.shares_held method
         return self._trade_log.shares_held(trade_date)
 
+
     def cash_position(self, trade_date=None):
         # Interface to TradeLog.cash_position method
         return self._trade_log.cash_position(trade_date)
+
 
     def position_value(self, trade_date=None) -> float:
         """ Value of shares held at specific date plus amount of cash on hand """
@@ -49,8 +55,10 @@ class Stock:
                 + self.cash_position(trade_date) 
         return pv
 
+
     def max_drawdown(self, trade_date=None):
         return self._trade_log.max_drawdown(trade_date)
+
 
     def spot_price(self, trade_date=None, col='close') -> float:
         """ 
@@ -66,6 +74,7 @@ class Stock:
 
         return self._ohlc_tsdb.ohlc.loc[trade_date][col]
 
+
     def rate_of_return(self, trade_date=None) -> float:
         """
         Calc RoR - Present value (shares + cash) / max-drawdown
@@ -78,14 +87,17 @@ class Stock:
         ror = present_value / abs(self.max_drawdown(trade_date))
 
         return ror
-        
+
+
     @property
     def ohlc(self):
         return self._ohlc_tsdb.ohlc
 
+
     @property
     def trade_log(self):
         return self._trade_log.trade_log
+
 
 class OHLC:
 
@@ -97,6 +109,7 @@ class OHLC:
         self.date_end = date_end
         self.ohlc = None
 
+
     def load_data(self):
         hdf_fn = self.config['data_source'].get('hdf5_file')
         try:
@@ -105,6 +118,7 @@ class OHLC:
             raise Exception(f'Cannot load data for {self.ticker.upper()}')
         logger.info(f'Loaded dataframe for {self.ticker.upper()}')
 
+
     def snip_dates(self):
         try:
             self.ohlc = self.ohlc.loc[self.date_start:self.date_end]
@@ -112,10 +126,12 @@ class OHLC:
             raise Exception(f'Cannot snip dates for f{self.ticker.upper()}')
         logger.info(f'Snipped dates for {self.ticker.upper()}')
 
+
     def calc_pct_ret(self):
         col_name = self.config['data_map'].get('spot_quote_col', 'close')
         self.ohlc['pct_ret'] = self.ohlc[col_name].pct_change()
         logger.info(f'Calculated pct return for {self.ticker.upper()}')
+
 
 class TradeLog:
     """
@@ -135,6 +151,7 @@ class TradeLog:
         self.trade_log['order_type'] = None
         self.trade_log['trade_cost'] = 0        # total cost of trade
 
+
     def log_trade(self, trade_date:str , order_type:str, shares:int, trade_cost:float):
         """
         Input trade date, type, qty and total cost of tranaction to trade log.
@@ -149,6 +166,7 @@ class TradeLog:
         self.trade_log.loc[trade_date, ['shares', 'order_type', 'trade_cost']] = [shares, order_type, trade_cost]
         logger.debug(f'Trade logged: {trade_date} {self.ticker.upper()} {order_type} {abs(shares)} @ ${round(trade_cost, 2)}')
 
+
     def shares_held(self, trade_date=None) -> float:
         """
         Return the sum of all shares held from beginning of the tradelog index up until
@@ -157,6 +175,7 @@ class TradeLog:
         if not trade_date:
             trade_date = self.trade_log.index[-1]
         return self.trade_log['shares'].loc[:trade_date].sum()
+
 
     def cash_position(self, trade_date=None) -> float:
         """
@@ -168,6 +187,7 @@ class TradeLog:
             trade_date = self.trade_log.index[-1]
         cash = self.trade_log['trade_cost'].loc[:trade_date].sum()
         return round(cash, 2)
+
 
     def max_drawdown(self, trade_date=None) -> float:
         """

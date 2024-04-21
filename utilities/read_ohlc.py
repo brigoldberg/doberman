@@ -40,7 +40,7 @@ if __name__ == '__main__':
     logger = get_logger(args)
     try:
         df = pd.read_hdf(args.hdf_fn, key=f'/{args.ticker}')
-        print_record(args, df.iloc[1])
+        print_record(args, df.iloc[0])
         print_record(args, df.iloc[-1])
     except KeyError:
         print(f'Could not find data for {args.ticker}')

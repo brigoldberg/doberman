@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # test_stock.py
 
 import os
@@ -8,41 +7,42 @@ app_path = os.path.join(os.path.expanduser('~/sandbox/doberman'))
 sys.path.append(app_path)
 from doberman import Stock
 
-symbol = 'brk-a'
-date_start = '2015-06-01'
-date_end = '2015-06-30'
+symbol = 'fake'
+date_start = '2024-03-01'
+date_end = '2024-03-30'
 trades = {
-    '2015-06-02': ('buy', 1),
-    '2015-06-05': ('sell', 1),
-    '2015-06-12': ('buy', 1),
-    '2015-06-22': ('sell', 1),
-    '2015-06-29': ('buy', 1) 
+    '2024-03-07': ('buy', 2),
+    '2024-03-14': ('sell', 1),
+    '2024-03-21': ('buy', 1),
     }
 
-CONFIG = os.path.expanduser('~/sandbox/doberman/config.toml')
+CONFIG = os.path.expanduser('~/sandbox/doberman/test-config.toml')
 stock = Stock(symbol, date_start, date_end, config=CONFIG)
 stock.load_data()
 
 def test_configuration():
-    # TEST CONFIGURATION
-    # Read configuration and check a parameter settting.
-    
+    """
+    Load configuration and test reading a parameter.
+    """
     cfg_val = stock.config['data_map'].get('spot_quote_col', '')
     assert cfg_val == 'close'
 
-def test_load_data(test_date='2015-06-09'):
-    # TEST OHLC CLASS - data loading and date snipping
-    # Read dataframe and confirm trade date / price match.
-    
+
+def test_load_data(test_date='2024-03-11'):
+    """
+    Test reading items from dataframe to ensure proper data loading.
+    """
     row_open = stock.spot_price(test_date, 'open')
     row_close = stock.spot_price(test_date, 'close')
 
-    assert [row_open, row_close] == approx([209400.00, 209700.00], abs=1)
+    assert [row_open, row_close] == approx([122.00, 123.90], abs=1)
 
-def test_log_trades(test_date='2015-06-15'):
-    # Add trades to trade log. Confirm shares held and USD position
-    # at specified date.
-    
+
+def test_log_trades(test_date='2024-03-21'):
+    """
+    Add trades to trade log, confirm shares held and USD position
+    at specified data.
+    """
     col_name = stock.config['data_map'].get('spot_quote_col', 'close')
 
     # Subimt fake orders
@@ -52,21 +52,46 @@ def test_log_trades(test_date='2015-06-15'):
         stock.log_trade(trade_date, order_type, shares, trade_cost)
 
     results = [
-        stock.trade_log.loc['2015-06-05'].shares,
-        stock.trade_log.loc['2015-06-05'].order_type,
-        stock.trade_log.loc['2015-06-05'].trade_cost ]
+        stock.trade_log.loc[test_date].shares,
+        stock.trade_log.loc[test_date].order_type,
+        stock.trade_log.loc[test_date].trade_cost ]
 
-    assert results == [-1.0, 'sell', 211560.0]
+    assert results == [1, 'buy', -143.8]
 
-def test_trade_log_stats(test_date='2015-06-30'):
-    # Test calculation of cash position, shares held and max
-    # drawdown
 
-    results = [
-        stock.shares_held(test_date),
-        stock.cash_position(test_date),
-        stock.shares_held('2015-06-15'),
-        stock.cash_position('2015-06-15'),
-        stock.max_drawdown()]
+def test_shares_held(test_date='2024-03-29'):
+    """
+    Sum of shares: 2 - 1 + 1 == 2
+    """
+    assert stock.shares_held(trade_date=test_date) == 2
 
-    assert results == [1, -206440, 1, -214020, -214820.0]
+
+def test_cash_position(test_date='2024-03-29'):
+    """
+    Cost of trades: -232.4 + 129.7 - 143.8 == -246.50
+    """
+    assert stock.cash_position(trade_date=test_date) == -246.50
+
+
+def test_position_value(test_date='2024-03-29'):
+    """
+    Calc value of cash and shares: -246.5(cash) + (2 * 161.7) == 76.90
+    """
+    assert stock.position_value(trade_date='2024-03-29') == approx(76.9, abs=1)
+
+
+def test_max_drawdown(test_date='2024-03-29'):
+    """
+    Max value of cash outlaid from trading
+    """
+    assert stock.max_drawdown() == approx(-246.5, abs=1)
+
+
+def test_spot_price():
+
+    assert stock.spot_price() == 161.7
+
+
+def test_rate_of_return():
+
+    assert stock.rate_of_return() == approx(0.313, abs=0.01)
