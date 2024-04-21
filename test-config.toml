@@ -1,0 +1,31 @@
+# Set sources for HDF5 file and ticker list source file
+[data_source]
+hdf5_file = "~/tick_data/test_data/test.h5"
+stock_list_file = "~/tick_data/test_data/test_stocks.txt"
+
+# Define columns of interest
+[data_map]
+spot_quote_col = 'close'
+
+# Set the log level for all modules
+[logging]
+log_level="debug"
+
+[strategy]
+max_position_risk = 10000
+buy_signal_boundary = 0.9
+sell_signal_boundary = -0.9
+
+[strategy.ema]
+window = 120
+hist_lo = 0.3
+hist_hi = 0.7
+buy_trigger = 50
+sell_trigger = 200
+
+[strategy.macd]
+macd_fast = 18
+macd_slow = 36
+macd_sig = 9
+hist_lo = -0.1
+hist_hi = 0.1
