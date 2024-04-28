@@ -1,8 +1,10 @@
 # backtester.py
+
 import logging
 import math
 
 logger = logging.getLogger()
+
 
 class BackTester:
 
@@ -12,6 +14,7 @@ class BackTester:
 
         self.spot_col = stock_obj.config['data_map'].get('column_name', 'close')
         self.risk_limit = self.stock_obj.config['strategy'].get('max_position_risk', 10000)
+
 
     def _risk_check(self, signal, trade_date, spot_price):
         """
@@ -38,8 +41,10 @@ class BackTester:
             
         return trade_size
 
+
     def _calc_trade_size(self, risk_allowed, spot_price):
         return math.floor(risk_allowed / spot_price)
+
 
     def backtest(self, signal_name):
         
