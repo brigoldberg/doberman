@@ -47,7 +47,7 @@ class Universe:
             "ticker_results": {}
         }
         for ticker in self.stocks:
-            cash = self.stocks[ticker].usd_position()
+            cash = self.stocks[ticker].cash_position()
             shares = self.stocks[ticker].shares_held()
             self.simulation_result['ticker_results'][ticker] = {
                 "shares": self.stocks[ticker].shares_held(),
@@ -87,7 +87,7 @@ class Book:
     def calc_book(self, trade_date=None):
         
         for ticker in self.universe.keys():
-            cash = self.universe[ticker].usd_position()
+            cash = self.universe[ticker].cash_position()
             shares = self.universe[ticker].shares_held()
             value = (shares * self.universe[ticker].ohlc.iloc[-1]['close']) + cash
             max_draw = self.universe[ticker].max_drawdown()
@@ -103,6 +103,6 @@ class Book:
             for ticker in self.universe.keys():
                share_price = self.universe[ticker].spot_price(trade_date)
                sv_sum = sv_sum + (share_price * self.universe[ticker].shares_held(trade_date))
-               cv_sum = cv_sum + self.universe[ticker].usd_position(trade_date)
+               cv_sum = cv_sum + self.universe[ticker].cash_position(trade_date)
 
             self._pnl.loc[trade_date, ['share_value', 'cash']] = [sv_sum, cv_sum]

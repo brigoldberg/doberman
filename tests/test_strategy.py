@@ -1,4 +1,6 @@
 # test_strategy.py
+
+import logging
 import os
 import sys
 from pytest import approx
@@ -7,14 +9,11 @@ sys.path.append(app_path)
 from doberman import Stock
 from doberman import StrategyFactory
 
+logger = logging.getLogger()
+
 symbol = 'fake'
 date_start = '2024-03-01'
 date_end = '2024-03-30'
-trades = {
-    '2024-03-07': ('buy', 2),
-    '2024-03-14': ('sell', 1),
-    '2024-03-21': ('buy', 1),
-    }
 
 CONFIG = os.path.expanduser('~/sandbox/doberman/test-config.toml')
 stock = Stock(symbol, date_start, date_end, config=CONFIG)

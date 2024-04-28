@@ -96,7 +96,7 @@ if __name__ == '__main__':
         universe.stocks[result.ticker] = result
 
         # REPORTING
-        universe.log_trade(result.ticker, result.shares_held(), result.usd_position())
+        universe.log_trade(result.ticker, result.shares_held(), result.cash_position())
 
     universe._universe_book.calc_book()
     universe._universe_book.calc_pnl()

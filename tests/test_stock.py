@@ -1,11 +1,14 @@
 # test_stock.py
 
+import logging
 import os
 import sys
 from pytest import approx
 app_path = os.path.join(os.path.expanduser('~/sandbox/doberman'))
 sys.path.append(app_path)
 from doberman import Stock
+
+logger = logging.getLogger()
 
 symbol = 'fake'
 date_start = '2024-03-01'

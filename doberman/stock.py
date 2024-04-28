@@ -1,4 +1,5 @@
 # stock.py
+
 import logging
 import pandas as pd
 from .utils import read_config
@@ -149,7 +150,7 @@ class TradeLog:
         self.trade_log = pd.DataFrame(index=[tl_index,], dtype='float64')
         self.trade_log['shares'] = 0            # shares held
         self.trade_log['order_type'] = None
-        self.trade_log['trade_cost'] = 0        # total cost of trade
+        self.trade_log['trade_cost'] = 0.0        # total cost of trade
 
 
     def log_trade(self, trade_date:str , order_type:str, shares:int, trade_cost:float):
